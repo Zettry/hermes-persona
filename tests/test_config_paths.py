@@ -187,7 +187,7 @@ class TestExplicitStoragePath:
             "storage_path": user_path,
         }
         ev = _ExpressionVector(cfg)
-        assert str(ev.storage_path) == user_path, (
+        assert ev.storage_path == Path(user_path).expanduser(), (
             f"Expected {user_path}, got {ev.storage_path}"
         )
 

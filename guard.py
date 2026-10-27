@@ -9,11 +9,15 @@ Configuration is read from persona-config.json → hermes-persona.guard.
 
 from __future__ import annotations
 
-import fcntl
 import json
 import re
 from datetime import datetime
 from pathlib import Path
+
+try:
+    import fcntl
+except ImportError:  # Windows has no fcntl; audit writes just skip the flock
+    fcntl = None
 
 
 # ---------------------------------------------------------------------------
@@ -174,11 +178,13 @@ def audit_tool_call(tool_name: str, args: dict, result, **kwargs) -> None:
         )
 
         with open(log_path, "a", encoding="utf-8") as f:
-            fcntl.flock(f, fcntl.LOCK_EX)
+            if fcntl is not None:
+                fcntl.flock(f, fcntl.LOCK_EX)
             try:
                 f.write(log_entry)
             finally:
-                fcntl.flock(f, fcntl.LOCK_UN)
+                if fcntl is not None:
+                    fcntl.flock(f, fcntl.LOCK_UN)
     except Exception:
         # Audit must never block or crash the agent
         pass

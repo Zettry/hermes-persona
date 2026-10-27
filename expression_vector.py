@@ -386,12 +386,13 @@ class _KeywordMatcher:
     """
 
     def __init__(self, keywords_dir: Path) -> None:
-        if not keywords_dir.is_dir():
-            raise FileNotFoundError(f"Keywords directory not found: {keywords_dir}")
-
         self._keywords_dir = keywords_dir
         self._dimensions: dict[str, frozenset[str]] = {}
         self._synonym_map: dict[str, set[str]] = {}
+        if not keywords_dir.is_dir():
+            # Fail-open: no keywords directory → empty dimensions, so the
+            # legacy regex fallback in dynamic_rules._match_keyword takes over.
+            return
         self._load()
 
     # ------------------------------------------------------------------

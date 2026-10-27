@@ -814,9 +814,12 @@ class TestKeywordMatcherConstruction:
         assert "吃饭" in km.dimensions["care"]
         assert "下厨" in km.dimensions["care"]
 
-    def test_nonexistent_dir_raises(self):
-        with pytest.raises(FileNotFoundError):
-            _KeywordMatcher(Path("/nonexistent/keywords/dir"))
+    def test_nonexistent_dir_fails_open(self):
+        """不存在的 keywords 目录 → fail-open：空加载而非抛异常（LOC-04 健壮性）。"""
+        km = _KeywordMatcher(Path("/nonexistent/keywords/dir"))
+        assert km.dimensions == {}
+        assert km.synonym_map == {}
+        assert km.match("hello") == []
 
     def test_empty_dir_does_not_crash(self, tmp_path):
         km = _KeywordMatcher(tmp_path)
