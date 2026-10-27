@@ -63,7 +63,11 @@ def _select_dynamic_rules(
 
     # keyword — modules not passed defaults to enabled
     if modules is None or modules.get("keyword", True):
-        rules.extend(_match_keyword(dynamic_cfg.get("keywords", {}), user_message))
+        # 文档/示例用单数 `keyword`；SPEC-006 时代遗留下复数 `keywords` 旧键，兼容两者。
+        kw_cfg = dynamic_cfg.get("keyword")
+        if kw_cfg is None:
+            kw_cfg = dynamic_cfg.get("keywords", {})
+        rules.extend(_match_keyword(kw_cfg, user_message))
 
     return rules
 
